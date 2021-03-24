@@ -33,10 +33,10 @@ client.on('message', message => {
 client.login();
 
 client.on('voiceStateUpdate', (oldState, newState) => {
-    if (!newState.channel || !newState.member) return; // Triggered if the user left a channel
-    const testChannel = newState.guild.channels.cache.find(c => c.name === 'test-voice');
+	const role = newState.guild.roles.cache.find(r => r.name === 'JDR-InGame');
+    if (!newState.channel || !newState.member) newState.member.roles.remove(role)//return; // Triggered if the user left a channel
+    const testChannel = newState.guild.channels.cache.find(c => c.name === 'En jeu vocal');
     if (newState.channelID === testChannel.id) { // Triggered when the user joined the channel we tested for
-        const role = newState.guild.roles.cache.find(r => r.name === 'Test');
         if (!newState.member.roles.cache.has(role)) newState.member.roles.add(role); // Add the role to the user if they don't already have it
     }
 });
