@@ -9,7 +9,7 @@ client.on('ready', () => {
 		console.log(`Logged in as ${client.user.tag}!`);
 	});
 
-client.on('message', msg => {
+client.on('message', message => {
 	if (message.author.bot) return;
 	// The process.env.PREFIX is your bot's prefix in this case.
 	if (message.content.indexOf(process.env.PREFIX) !== 0) return;
