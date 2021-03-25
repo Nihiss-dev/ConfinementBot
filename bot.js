@@ -4,6 +4,7 @@ const Discord = require('discord.js');
 const { write } = require('./utils');
 const client = new Discord.Client({ partials: ['MESSAGE', 'CHANNEL', 'REACTION'] });
 const utils = require('./utils');
+const fs = require('fs');
 
 var channels = {};
 
@@ -19,19 +20,23 @@ var IdtoRole = {
 console.log(client);
 client.on('ready', () => {
 		console.log(`Logged in as ${client.user.tag}!`);
-		var loadedInfo = utils.loadIdToRole();
-		
-		infosJson = JSON.parse(loadedInfo);
 
-		infosJson.table.forEach(function(info) {
-			console.log(`infos: ${info.messageId}`);
-			console.log(`loadedInfo: ${info.Role}`);	
-			IdtoRole.table.push(info);
-		});
+		if (fs.existsSync("data.json")) {
 
-		IdtoRole.table.forEach(function(value) {
-			console.log(`${value.messageId} on message`);
-		});
+			var loadedInfo = utils.loadIdToRole();
+			
+			infosJson = JSON.parse(loadedInfo);
+
+			infosJson.table.forEach(function(info) {
+				console.log(`infos: ${info.messageId}`);
+				console.log(`loadedInfo: ${info.Role}`);	
+				IdtoRole.table.push(info);
+			});
+
+			IdtoRole.table.forEach(function(value) {
+				console.log(`${value.messageId} on message`);
+			});
+		}
 	});
 
 client.on('message', message => {

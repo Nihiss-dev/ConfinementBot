@@ -10,7 +10,7 @@ module.exports = {
         var contents = fs.readFileSync("data.json");
         /*var jsonContent = JSON.parse(contents);
         return jsonContent;*/
-        return contents;
+        return contents;    
     },
 
     writeIdtoRole : function(messageId, role) {
