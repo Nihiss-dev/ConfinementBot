@@ -2,45 +2,41 @@
 require('dotenv').config(); 
 const Discord = require('discord.js');
 const { write } = require('./utils');
-const client = new Discord.Client({ partials: ['MESSAGE', 'CHANNEL', 'REACTION'] });
+const clientDiscord = new Discord.Client({ partials: ['MESSAGE', 'CHANNEL', 'REACTION'] });
 const utils = require('./utils');
-const fs = require('fs');
 
-var channels = {};
+const { Client } = require('pg');
 
-var infos = function() {
-	this.messageId = "";
-	this.Role = "";
-}
+const clientPG = new Client({
+  connectionString: process.env.DATABASE_URL,
+  ssl: {
+    rejectUnauthorized: false
+  }
+});
 
-var IdtoRole = {
-	table : []
-}
+clientPG.connect();
 
-console.log(client);
-client.on('ready', () => {
-		console.log(`Logged in as ${client.user.tag}!`);
+console.log(clientDiscord);
+clientDiscord.on('ready', () => {
+		console.log(`Logged in as ${clientDiscord.user.tag}!`);
+});
 
-		if (fs.existsSync("data.json")) {
-
-			var loadedInfo = utils.loadIdToRole();
-			
-			infosJson = JSON.parse(loadedInfo);
-
-			infosJson.table.forEach(function(info) {
-				console.log(`infos: ${info.messageId}`);
-				console.log(`loadedInfo: ${info.Role}`);	
-				IdtoRole.table.push(info);
-			});
-
-			IdtoRole.table.forEach(function(value) {
-				console.log(`${value.messageId} on message`);
-			});
-		}
-	});
-
-client.on('message', message => {
+clientDiscord.on('message', message => {
 	if (message.author.bot) return;
+
+	if (message.content.length < 5 && message.content.toLowerCase().substring(0,3) === 'oui') {
+		if (utils.between(0, 100) > 50) {
+			message.channel.send("stiti.");			
+		}
+	}
+
+	if (message.content.length < 6 && message.content.toLowerCase().substring(0,4) === 'quoi') {
+		if (utils.between(0, 100) > 50) {
+			message.channel.send("feur.");			
+		}
+	}
+	// COMMANDS
+
 	// The process.env.PREFIX is your bot's prefix in this case.
 	if (message.content.indexOf(process.env.PREFIX) !== 0) return;
   
@@ -56,20 +52,25 @@ client.on('message', message => {
 	  message.channel.send('Meh.');
 	} else
 	if (command === 'addmessage') {
-		channels[args[0]] = args[1];
-		infos.messageId = args[0];
-		infos.Role = args[1];
-		IdtoRole.table.push(infos);
-		utils.writeId(IdtoRole);
+		text = 'INSERT INTO MessageToRole(messageId, role, emoji) VALUES($1, $2, $3)';
+		values = [args[0], args[1], args[2]];
+
+		clientPG.query(text, values, (err, res) => {
+			if (err) {
+			  console.log(err.stack)
+			} else {
+			  console.log(res.rows[0])
+			}
+		  })
 	}
   });
 
 
 // There's zero need to put something here. Discord.js uses process.env.CLIENT_TOKEN if it's available,
 // and this is what is being used here. If on discord.js v12, it's DISCORD_TOKEN
-client.login();
+clientDiscord.login();
 
-client.on('voiceStateUpdate', (oldState, newState) => {
+clientDiscord.on('voiceStateUpdate', (oldState, newState) => {
 	const role = newState.guild.roles.cache.find(r => r.name === 'JDR-InGame');
     if (!newState.channel || !newState.member) newState.member.roles.remove(role)//return; // Triggered if the user left a channel
     const testChannel = newState.guild.channels.cache.find(c => c.name === 'En jeu vocal');
@@ -79,7 +80,7 @@ client.on('voiceStateUpdate', (oldState, newState) => {
     }
 });
 
-client.on('messageReactionAdd', async (reaction, user) => {
+clientDiscord.on('messageReactionAdd', async (reaction, user) => {
 	// When we receive a reaction we check if the reaction is partial or not
 	if (reaction.partial) {
 		// If the message this reaction belongs to was removed the fetching might result in an API error, which we need to handle
@@ -91,22 +92,25 @@ client.on('messageReactionAdd', async (reaction, user) => {
 			return;
 		}
 	}
-	// Now the message has been cached and is fully available
-	console.log(`${reaction.message.author}'s message "${reaction.message.content}" gained a reaction!`);
-	// The reaction is now also fully available and the properties will be reflected accurately:
-	console.log(`${reaction.count} user(s) have given the same reaction to this message!`);
-	console.log(`${reaction.emoji.name} has been added`);
-	console.log(`${reaction.message.id}: message id`);
+	query = {
+		name : 'getRoleFromMessageIdAndEmoji',
+		text : 'SELECT role FROM MessageToRole WHERE messageId=$1 AND emoji=$2',
+		values : [reaction.message.id, `${reaction.emoji}`],
+	}
 
-	IdtoRole.table.forEach(function(info) {
-		if (info.messageId == reaction.message.id) {
-			console.log(`${reaction.emoji.name} on message`);
-			const role = reaction.message.guild.roles.cache.find(r => r.name === info.Role);
+	console.log(query);
 
-            const { guild } = reaction.message //store the guild of the reaction in variable
-            const member = guild.members.cache.find(member => member.id === user.id); //find the member who reacted (because user and member are seperate things)
-            member.roles.add(role); //assign selected role to member
-		}
-	});
+	clientPG.query(query, (err, res) => {
+		if (err) {
+		  console.log(err.stack)
+		} else {
+		  newRole = res.rows[0].role;
 
+		  const role = reaction.message.guild.roles.cache.find(r => r.name === newRole);
+
+		  const { guild } = reaction.message //store the guild of the reaction in variable
+		  const member = guild.members.cache.find(member => member.id === user.id); //find the member who reacted (because user and member are seperate things)
+		  member.roles.add(role); //assign selected role to member
+	  }
+	  })
 });
