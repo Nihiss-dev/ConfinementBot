@@ -98,8 +98,6 @@ clientDiscord.on('messageReactionAdd', async (reaction, user) => {
 		values : [reaction.message.id, `${reaction.emoji}`],
 	}
 
-	console.log(query);
-
 	clientPG.query(query, (err, res) => {
 		if (err) {
 		  console.log(err.stack)
@@ -111,6 +109,38 @@ clientDiscord.on('messageReactionAdd', async (reaction, user) => {
 		  const { guild } = reaction.message //store the guild of the reaction in variable
 		  const member = guild.members.cache.find(member => member.id === user.id); //find the member who reacted (because user and member are seperate things)
 		  member.roles.add(role); //assign selected role to member
+	  }
+	  })
+});
+
+clientDiscord.on('messageReactionRemove', async (reaction, user) => {
+	if (reaction.partial) {
+		// If the message this reaction belongs to was removed the fetching might result in an API error, which we need to handle
+		try {
+			await reaction.fetch();
+		} catch (error) {
+			console.error('Something went wrong when fetching the message: ', error);
+			// Return as `reaction.message.author` may be undefined/null
+			return;
+		}
+	}
+	query = {
+		name : 'getRoleFromMessageIdAndEmoji',
+		text : 'SELECT role FROM MessageToRole WHERE messageId=$1 AND emoji=$2',
+		values : [reaction.message.id, `${reaction.emoji}`],
+	}
+
+	clientPG.query(query, (err, res) => {
+		if (err) {
+		  console.log(err.stack)
+		} else {
+		  newRole = res.rows[0].role;
+
+		  const role = reaction.message.guild.roles.cache.find(r => r.name === newRole);
+
+		  const { guild } = reaction.message //store the guild of the reaction in variable
+		  const member = guild.members.cache.find(member => member.id === user.id); //find the member who reacted (because user and member are seperate things)
+		  member.roles.remove(role); //remove selected role to member
 	  }
 	  })
 });
