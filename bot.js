@@ -102,14 +102,22 @@ clientDiscord.on('messageReactionAdd', async (reaction, user) => {
 		if (err) {
 		  console.log(err.stack)
 		} else {
-		  newRole = res.rows[0].role;
+			let newRole;
+			try {
+				newRole = res.rows[0].role;
 
-		  const role = reaction.message.guild.roles.cache.find(r => r.name === newRole);
-
-		  const { guild } = reaction.message //store the guild of the reaction in variable
-		  const member = guild.members.cache.find(member => member.id === user.id); //find the member who reacted (because user and member are seperate things)
-		  member.roles.add(role); //assign selected role to member
-	  }
+			}
+			catch (error) {
+				newRole = null;
+			}
+			if (newRole != null) {
+				const role = reaction.message.guild.roles.cache.find(r => r.name === newRole);
+	  
+				const { guild } = reaction.message //store the guild of the reaction in variable
+				const member = guild.members.cache.find(member => member.id === user.id); //find the member who reacted (because user and member are seperate things)
+				member.roles.add(role); //assign selected role to member	  	
+			}
+  		}
 	  })
 });
 
@@ -134,13 +142,20 @@ clientDiscord.on('messageReactionRemove', async (reaction, user) => {
 		if (err) {
 		  console.log(err.stack)
 		} else {
-		  newRole = res.rows[0].role;
+			let newRole;
+			try {
+				newRole = res.rows[0].role;
+			} catch (error) {
+				newRole = null;
+			}
 
-		  const role = reaction.message.guild.roles.cache.find(r => r.name === newRole);
+			if (newRole != null) {
+				const role = reaction.message.guild.roles.cache.find(r => r.name === newRole);
 
-		  const { guild } = reaction.message //store the guild of the reaction in variable
-		  const member = guild.members.cache.find(member => member.id === user.id); //find the member who reacted (because user and member are seperate things)
-		  member.roles.remove(role); //remove selected role to member
-	  }
+				const { guild } = reaction.message //store the guild of the reaction in variable
+				const member = guild.members.cache.find(member => member.id === user.id); //find the member who reacted (because user and member are seperate things)
+				member.roles.remove(role); //remove selected role to member	  
+			}
+		  }
 	  })
 });
