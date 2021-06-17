@@ -30,9 +30,27 @@ clientDiscord.on('message', message => {
 		}
 	}
 
+	if (message.content.length < 5 && message.content.toLowerCase().substring(0,3) === 'non') {
+		if (utils.between(0, 100) > 50) {
+			message.channel.send("bril.");			
+		}
+	}
+
 	if (message.content.length < 6 && message.content.toLowerCase().substring(0,4) === 'quoi') {
 		if (utils.between(0, 100) > 50) {
 			message.channel.send("feur.");			
+		}
+	}
+
+	if (message.content.length < 6 && message.content.toLowerCase().substring(0,4) === 'hein') {
+		if (utils.between(0, 100) > 50) {
+			message.channel.send("deux.");			
+		}
+	}
+
+	if (message.content.length < 7 && message.content.toLowerCase().substring(0,5) === 'ouais') {
+		if (utils.between(0, 100) > 50) {
+			message.channel.send("stern.");			
 		}
 	}
 	// COMMANDS
@@ -71,6 +89,7 @@ clientDiscord.on('message', message => {
 clientDiscord.login();
 
 clientDiscord.on('voiceStateUpdate', (oldState, newState) => {
+	console.log('voicestateupdate');
 	const role = newState.guild.roles.cache.find(r => r.name === 'JDR-InGame');
     if (!newState.channel || !newState.member) newState.member.roles.remove(role)//return; // Triggered if the user left a channel
     const testChannel = newState.guild.channels.cache.find(c => c.name === 'En jeu vocal');
@@ -159,3 +178,8 @@ clientDiscord.on('messageReactionRemove', async (reaction, user) => {
 		  }
 	  })
 });
+
+clientDiscord.on('guildMemberAdd', (member) => {
+	const role = member.guild.roles.cache.find(r => r.name === 'SlowRunners');
+	member.roles.add(role);
+});	
