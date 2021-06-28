@@ -24,35 +24,47 @@ clientDiscord.on('ready', () => {
 clientDiscord.on('message', message => {
 	if (message.author.bot) return;
 
+	hasBeenPranked = false;
 	if (message.content.length < 5 && message.content.toLowerCase().substring(0,3) === 'oui') {
-		if (utils.between(0, 100) > 50) {
-			message.channel.send("stiti.");			
+		if (utils.getProbability(50)) {
+			message.channel.send("stiti.");
+			hasBeenPranked = true;
 		}
 	}
 
 	if (message.content.length < 5 && message.content.toLowerCase().substring(0,3) === 'non') {
-		if (utils.between(0, 100) > 50) {
+		if (utils.getProbability(50)) {
 			message.channel.send("bril.");			
+			hasBeenPranked = true;
 		}
 	}
 
 	if (message.content.length < 6 && message.content.toLowerCase().substring(0,4) === 'quoi') {
-		if (utils.between(0, 100) > 50) {
+		if (utils.getProbability(50)) {
 			message.channel.send("feur.");			
+			hasBeenPranked = true;
 		}
 	}
 
 	if (message.content.length < 6 && message.content.toLowerCase().substring(0,4) === 'hein') {
-		if (utils.between(0, 100) > 50) {
+		if (utils.getProbability(50)) {
 			message.channel.send("deux.");			
+			hasBeenPranked = true;
 		}
 	}
 
 	if (message.content.length < 7 && message.content.toLowerCase().substring(0,5) === 'ouais') {
-		if (utils.between(0, 100) > 50) {
+		if (utils.getProbability(50)) {
 			message.channel.send("stern.");			
+			hasBeenPranked = true;
 		}
 	}
+
+	if (utils.getProbability(5) && !hasBeenPranked) {
+		var string = "AH OUAIS " + message.author.toString() + " " + message.content.toUpperCase() + " ???";
+		message.channel.send(string);
+	}
+
 	// COMMANDS
 
 	// The process.env.PREFIX is your bot's prefix in this case.

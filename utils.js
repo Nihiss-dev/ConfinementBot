@@ -4,5 +4,9 @@ module.exports = {
         return Math.floor(
           Math.random() * (max - min) + min
         )
-      }
+      },
+
+    getProbability : function(percentage) {
+      return this.between(0, 100) >= (100 - percentage);
+    }
 }
