@@ -60,7 +60,7 @@ clientDiscord.on('message', message => {
 		}
 	}
 
-	if (utils.getProbability(5) && !hasBeenPranked) {
+	if (utils.getProbability(5) && !hasBeenPranked && !utils.isStringURL(message.content)) {
 		var string = "AH OUAIS " + message.author.toString() + " " + message.content.toUpperCase() + " ???";
 		message.channel.send(string);
 	}
