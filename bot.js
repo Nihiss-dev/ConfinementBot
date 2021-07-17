@@ -1,6 +1,7 @@
 // This line MUST be first, for discord.js to read the process envs!
 require('dotenv').config(); 
 const Discord = require('discord.js');
+const fetch = require('node-fetch');
 const { write } = require('./utils');
 const clientDiscord = new Discord.Client({ partials: ['MESSAGE', 'CHANNEL', 'REACTION'] });
 const utils = require('./utils');
@@ -58,6 +59,21 @@ clientDiscord.on('message', message => {
 			message.channel.send("stern.");			
 			hasBeenPranked = true;
 		}
+	}
+
+	if (message.content.includes("blague"))
+	{
+		hasBeenPranked = true;
+		fetch('https://www.blagues-api.fr/api/random', {
+		    headers: {
+        	'Authorization': `Bearer ` + process.env.BLAGUES_TOKEN
+    		}
+		})
+		.then(response => response.json())
+		.then(data => {
+			message.channel.send(data.joke);
+			message.channel.send(data.answer);
+		})
 	}
 
 	if (utils.getProbability(5) && !hasBeenPranked && !utils.isStringURL(message.content)) {
