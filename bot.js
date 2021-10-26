@@ -64,7 +64,7 @@ clientDiscord.on('message', message => {
 	if (message.content.includes("blague"))
 	{
 		hasBeenPranked = true;
-		fetch('https://www.blagues-api.fr/api/random', {
+		fetch('https://www.blagues-api.fr/api/random?disallow=dev', {
 		    headers: {
         	'Authorization': `Bearer ` + process.env.BLAGUES_TOKEN
     		}
